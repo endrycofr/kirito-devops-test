@@ -1,0 +1,37 @@
+replicaCount: 2
+
+image:
+  name: kirito
+  namespace: golang-test-kirito
+  registry: registry.nuha.care
+  repository: registry.nuha.care/endryco/kirito
+  tag: "32190256d8a6c3e41bb55bb01a042db2cf6bd64f"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080  # Port yang di-listen aplikasi Go
+  annotations: {}
+
+ingress:
+  class: traefik
+  enabled: true
+  host: kirito.nuha.care
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

@@ -1,0 +1,10 @@
+# Ignore Git
+.git/
+.gitignore
+.dockerignore
+# Ignore build artifacts
+dist/
+build/
+*.tgz
+*.bak
+*.tmp

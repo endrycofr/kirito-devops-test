@@ -1,0 +1,41 @@
+1. Langkah-langkah menemukan root cause saat Kirito mengalami 5xx error
+
+- Cek logs aplikasi
+Gunakan kubectl logs untuk pod Kirito:
+
+kubectl logs <pod-name> -n <namespace>
+
+- Lihat apakah ada panic, nil pointer, timeout, atau error database / API.
+Cek status pod & container dengan bisa melihat event dari pods yang terjadi error atau CrashLoopBackOff ataupun contaircreating yang stuck
+Gunakan:
+
+kubectl get pods -n <namespace>
+kubectl describe pod <pod-name> -n <namespace>
+
+Periksa:
+-CrashLoopBackOff
+-OOMKilled (Out of memory)
+-CPU throttling
+
+Untuk mempermudah dan mempercepat analisis root cause, kita dapat memanfaatkan Rancher dan ArgoCD. Kedua tools ini menyediakan dashboard UI yang memudahkan monitoring dan analisis sistem secara visual.
+Selain itu, dengan menggunakan Longhorn, kita dapat melakukan snapshot konfigurasi yang aman, sehingga jika terdapat masalah yang belum terselesaikan, konfigurasi dapat dikembalikan dengan cepat. 
+Di lingkungan produksi, hal ini memungkinkan rollback otomatis atau manual melalui ArgoCD, agar aplikasi tetap berjalan tanpa gangguan saat proses analisis berlangsung.
+Untuk pemantauan kondisi server secara real-time, kombinasi Grafana, Prometheus, dan Promtail dapat digunakan untuk memonitor performa dan log secara menyeluruh.
+
+2. Resolution & Preventive Measures for Kirito 5xx Errors
+Terapkan readiness dan liveness probes pada pod Kirito agar traffic hanya diarahkan ke pod yang sehat, sekaligus menyiapkan backup otomatis untuk mengamankan data sebelum terjadi error. 
+Gunakan Horizontal Pod Autoscaler (HPA) berbasis CPU, memory, atau custom metrics serta mekanisme limiter, timeouts, context cancellation, dan graceful shutdown untuk menjaga stabilitas saat traffic tinggi. 
+Untuk observabilitas, manfaatkan Jaeger/OpenTelemetry untuk memonitor request flow dan latency, serta Prometheus, Promtail, dan Grafana untuk logging dan monitoring terpusat dengan alert untuk error 5xx, latency tinggi, dan spike resource. 
+Terapkan ArgoCD/GitOps agar setiap perubahan bisa di-rollback bila terjadi masalah di production, sambil fokus pada code improvement. Rancang arsitektur multi-region dengan load balancer agar tidak ada single point of failure dan traffic terdistribusi merata, 
+sehingga layanan tetap stabil meski server bermasalah atau traffic tinggi.
+
+
+3.tools resolve
+di  Kubernetes, kubectl menjadi command-line utama untuk memantau pod, deployment, service, event, dan logs, misalnya dengan kubectl logs atau kubectl describe pod. 
+Untuk logging ringan yang terintegrasi dengan dashboard pakai Loki + Grafana , sementara Prometheus mengumpulkan metrics dari pod, node, ingress, 
+dan service seperti CPU, memory, network, request rate, dan error 5xx, yang kemudian divisualisasikan di Grafana dengan panel latency, request per second, dan error rate; 
+juga untuk memantau mudah pakai kubectl top juga bisa digunakan untuk pengecekan cepat. 
+Untuk observabilitas dan tracing performa pakai Jaeger ataupun OpenTelemetry memungkinkan melihat request flow antar microservices, latency, 
+bottleneck, dan error. Di sisi deployment,bisa pakai ArgoCD memfasilitasi GitOps dengan rollback otomatis dan sinkronisasi konfigurasi, 
+sementara Helm memudahkan manajemen chart, update versi, dan rollback release. Untuk storage dan recovery, Longhorn menyediakan manajemen Persistent Volume dengan kemampuan restore snapshot untuk mengembalikan state saat root cause terkait data, 
+dan untuk load testing atau debugging, tools seperti k6 atau JMeter membantu mensimulasikan traffic tinggi atau skenario error 5xx agar masalah dapat direproduksi dan dianalisis lebih cepat.

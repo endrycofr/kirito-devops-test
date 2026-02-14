@@ -1,0 +1,5 @@
+apiVersion: v2
+name: golang_test
+description: golang_test chart for testing CI/CD pipelines
+version: 0.1.0
+appVersion: "1.0"

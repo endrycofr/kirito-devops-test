@@ -1,0 +1,3 @@
+charts/**/templates/*.yaml
+charts/**/templates/*.yml
+charts/**/templates/*.json
