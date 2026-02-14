@@ -34,17 +34,17 @@ build:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
 
 
-# # ---------------- TEST ----------------
-# test:
-#   stage: test
-#   image: golang:1.23-alpine
-#   script:
-#     - apk add --no-cache git
-#     - go test ./... -v
-#   tags:
-#     - golang
-#   rules:
-#     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
+# ---------------- TEST ----------------
+test:
+  stage: test
+  image: golang:1.23-alpine
+  script:
+    - apk add --no-cache git
+    - go test ./... -v
+  tags:
+    - golang
+  rules:
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
 
 
 # ---------------- DOCKER BUILD ----------------
