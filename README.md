@@ -1,93 +1,184 @@
-# Golang_test
+# Kube & CI/CD App Golang
 
+Project ini adalah contoh implementasi **DevOps end-to-end** dengan **Golang**, menggunakan **RKE2 Kubernetes** sebagai cluster dan **GitLab CI/CD** untuk otomatisasi build, push, dan deploy aplikasi.
 
+---
 
-## Getting started
+## 🔹 Arsitektur Cluster RKE2
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+Berikut adalah arsitektur cluster Kubernetes RKE2 dengan 1 Master Node dan 3 Slave Nodes:
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+![RKE2 Cluster Architecture](../img/rke2-cluster-architecture.png)
 
-## Add your files
+**Komponen Master Node:**
+- **API Server** - Mengelola semua request dan state cluster
+- **Control Manager** - Mengontrol node, pod, dan resource lainnya
+- **Scheduler** - Menentukan placement pod ke worker nodes
+- **etcd** - Database distributed untuk menyimpan state cluster
 
-* [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+**Komponen Setiap Slave Node:**
+- **kubelet** - Agent yang menjalankan container
+- **kube-proxy** - Network proxy untuk komunikasi pod
+- **Container Runtime** - Docker yang menjalankan Pod 1 dan Pod 2
+
+---
+
+## 🔹 Arsitektur & Flow CI/CD
+
+Berikut flow lengkap GitLab CI/CD hingga deployment ke Kubernetes:
+
+![GitLab CI/CD Flow](../img/gitlab-cicd-flow.png)
+
+**Pipeline Flow:**
+
+1. **Developer Commit & Push Code** ke repository GitLab
+2. **GitLab CI Pipeline** dijalankan:
+   - Build Docker image dari Dockerfile
+   - Tag dan push image ke Docker Registry
+3. **Update Manifest Values** - Update `values.yaml` di Manifest Repository dengan image tag terbaru
+4. **ArgoCD Sync** - ArgoCD mendeteksi perubahan manifest
+5. **Deploy ke Kubernetes** - Manifest di-apply ke cluster RKE2 via Helm Chart
+
+---
+
+## 🔹 Arsitektur Load Balancing & Ingress
+
+Berikut adalah arsitektur network dan load balancing dengan MetalLB dan Traefik Ingress:
+
+![Load Balancing Architecture](../img/load-balancing-architecture.png)
+
+**Komponen Baremetal (On-Premises):**
+- **LB SVC 1** - Service Load Balancer yang mendistribusikan traffic ke 3 worker nodes
+
+**Komponen Kubernetes Cluster:**
+- **MetalLB VIP (External IP)** - Virtual IP dari MetalLB untuk mengexpose service ke external network
+- **Traefik Ingress Controller** - Mengelola routing HTTP traffic berdasarkan hostname/path
+- **LB SVC Worker 1, 2, 3** - Worker nodes yang menjalankan pod aplikasi
+- **HTTP Routes 1, 2, 3** - Routing rules untuk setiap service
+
+---
+
+## 🔹 Tools yang Digunakan
+
+| Kategori           | Tools                     | Keterangan                                     |
+| ------------------ | ------------------------- | ---------------------------------------------- |
+| **Containerization** | Docker                   | Build image aplikasi Golang                    |
+| **Kubernetes Cluster** | RKE2                    | Cluster Kubernetes untuk deploy aplikasi       |
+| **CI/CD Pipeline**  | GitLab CI/CD              | Pipeline otomatis build, push, deploy          |
+| **Container Registry** | Docker Registry          | Menyimpan image yang sudah dibuild             |
+| **Package Manager** | Helm                      | Deploy dan manage aplikasi di Kubernetes       |
+| **GitOps**          | ArgoCD                    | Sync manifest ke cluster secara otomatis       |
+| **Load Balancing**  | MetalLB                   | Assign external IP di environment on-premises  |
+| **Ingress Controller** | Traefik                 | HTTP routing dan load balancing                |
+| **Language**        | Go Modules                | Manage dependencies Golang                     |
+| **Monitoring**      | kubectl                   | Mengecek status pod, service, deployment       |
+
+---
+
+## 🔹 Struktur Repository
 
 ```
-cd existing_repo
-git remote add origin http://10.100.2.133/endrycofr/golang_test.git
-git branch -M main
-git push -uf origin main
+├── rke2/                      # Kubernetes manifests untuk RKE2
+│   ├── templates/
+│   │   ├── service/
+│   │   ├── ingress/
+│   │   └── deployment/
+│   ├── Chart.yaml
+│   └── values.yaml
+├── kubeconfig/                # File kubeconfig akses cluster
+├── Dockerfile                 # Build Golang image
+├── .gitlab-ci.yml             # Pipeline CI/CD GitLab
+├── main.go                    # Source code Golang
+├── go.mod / go.sum            # Go dependencies
+├── img/                      # foto & diagram arsitektur
+│   ├── rke2-cluster-architecture.png
+│   ├── gitlab-cicd-flow.png
+│   └── load-balancing-architecture.png
+└── README.md                  # Dokumentasi ini
 ```
 
-## Integrate with your tools
+---
 
-* [Set up project integrations](http://10.100.2.133/endrycofr/golang_test/-/settings/integrations)
+## 🔹 GitLab CI/CD Pipeline
 
-## Collaborate with your team
+Pipeline otomatis mengikuti tahapan berikut:
 
-* [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+### **1. Build Stage**
+- Build Docker image dari Dockerfile yang berisi aplikasi Golang
+- Menjalankan `docker build` dengan context dari repository
 
-## Test and Deploy
+### **2. Push Stage**
+- Push image ke Docker Registry dengan tag latest dan commit SHA
+- Memastikan image tersedia untuk digunakan saat deployment
 
-Use the built-in continuous integration in GitLab.
+### **3. Deploy Stage**
+- Update nilai image di Manifest Repository (values.yaml)
+- ArgoCD mendeteksi perubahan dan melakukan sync otomatis
+- Deploy ke cluster RKE2 menggunakan Helm Chart
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+**Persyaratan:**
+- GitLab Runner harus memiliki akses ke kubeconfig RKE2
+- Docker Registry credentials dikonfigurasi di GitLab CI/CD variables
+- Manifest Repository dan cluster harus accessible dari runner
 
-***
+---
 
-# Editing this README
+## 🔹 Quick Start
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### Prerequisites
+```bash
+# Install RKE2
+curl https://get.rke2.io | sh
 
-## Suggestions for a good README
+# Install kubectl
+chmod +x ./kubectl
+sudo mv ./kubectl /usr/local/bin/
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+# Install Helm
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
-## Name
-Choose a self-explaining name for your project.
+# Install ArgoCD
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+### Deploy Aplikasi
+```bash
+# Clone repository
+git clone <your-repo-url>
+cd kube-golang-app
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+# Configure kubeconfig
+export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+# Deploy menggunakan Helm
+helm install my-app ./rke2 -f rke2/values.yaml
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+# Verify deployment
+kubectl get pods -n default
+kubectl get svc -n default
+```
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+---
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+## 🔹 Project Sebelumnya
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+- [k3s DevOps Project](https://github.com/endrycofr/Ansible_k3s.git) – Versi sebelumnya menggunakan **k3s** cluster dengan arsitektur yang lebih sederhana.
+- [VM Provisioning Vagrant](https://github.com/endrycofr/Vagrant_VM.git)
+-[RKE2 DevOps Project](https://github.com/endrycofr/Ansible_k3s.git) – Versi sebelumnya menggunakan **RKE2** cluster dengan arsitektur yang lebih sederhana.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+---
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+## 📝 Notes
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+- Pastikan semua node terhubung dengan baik sebelum deployment
+- Monitor logs dengan `kubectl logs -f <pod-name>`
+- Gunakan `kubectl describe pod <pod-name>` untuk debugging
+- ArgoCD dapat diakses melalui Traefik Ingress setelah dikonfigurasi
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+---
 
-## License
-For open source projects, say how it is licensed.
+---
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+**Last Updated:** February 2026  
+**Maintainer:** DevOps Team
