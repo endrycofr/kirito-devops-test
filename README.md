@@ -163,9 +163,13 @@ kubectl get svc -n default
 
 ## 🔹 Project Sebelumnya
 
-- [k3s DevOps Project](https://github.com/endrycofr/Ansible_k3s.git) – Versi sebelumnya menggunakan **k3s** cluster dengan arsitektur yang lebih sederhana.
-- [VM Provisioning Vagrant](https://github.com/endrycofr/Vagrant_VM.git)
--[RKE2 DevOps Project](https://github.com/endrycofr/Ansible_k3s.git) – Versi sebelumnya menggunakan **RKE2** cluster dengan arsitektur yang lebih sederhana.
+Oke, kalau begitu bagian **referensi proyek sebelumnya** bisa kita update untuk menjelaskan konteks RKE2, sekaligus menampilkan link ke proyek lama yang menggunakan K3s dan VM provisioning. Misalnya bisa ditulis di README bagian *Acknowledgments* atau *References*:
+
+---
+
+* [k3s DevOps Project](https://github.com/endrycofr/Ansible_k3s.git) – Versi sebelumnya menggunakan **K3s** cluster dengan arsitektur sederhana berbasis Ansible. Cocok sebagai referensi atau migrasi ke **RKE2**.
+* [VM Provisioning Vagrant](https://github.com/endrycofr/Vagrant_VM.git) – Skrip provisioning **VirtualBox VMs** untuk environment development dan testing.
+
 
 ---
 
