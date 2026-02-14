@@ -8,7 +8,7 @@ Project ini adalah contoh implementasi **DevOps end-to-end** dengan **Golang**, 
 
 Berikut adalah arsitektur cluster Kubernetes RKE2 dengan 1 Master Node dan 3 Slave Nodes:
 
-![RKE2 Cluster Architecture](../img/rke2-cluster-architecture.png)
+![RKE2 Cluster Architecture](https://github.com/endrycofr/kirito-devops-test/blob/master/img/rke2-cluster-architecture.png)
 
 **Komponen Master Node:**
 - **API Server** - Mengelola semua request dan state cluster
@@ -27,7 +27,7 @@ Berikut adalah arsitektur cluster Kubernetes RKE2 dengan 1 Master Node dan 3 Sla
 
 Berikut flow lengkap GitLab CI/CD hingga deployment ke Kubernetes:
 
-![GitLab CI/CD Flow](../img/gitlab-cicd-flow.png)
+![GitLab CI/CD Flow](https://github.com/endrycofr/kirito-devops-test/blob/master/img/gitlab-cicd-flow.png)
 
 **Pipeline Flow:**
 
@@ -45,7 +45,7 @@ Berikut flow lengkap GitLab CI/CD hingga deployment ke Kubernetes:
 
 Berikut adalah arsitektur network dan load balancing dengan MetalLB dan Traefik Ingress:
 
-![Load Balancing Architecture](../img/load-balancing-architecture.png)
+![Load Balancing Architecture](https://github.com/endrycofr/kirito-devops-test/blob/master/img/load-balancing-architecture.png)
 
 **Komponen Baremetal (On-Premises):**
 - **LB SVC 1** - Service Load Balancer yang mendistribusikan traffic ke 3 worker nodes
@@ -179,6 +179,3 @@ kubectl get svc -n default
 ---
 
 ---
-
-**Last Updated:** February 2026  
-**Maintainer:** DevOps Team
